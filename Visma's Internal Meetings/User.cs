@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Visma_s_Internal_Meetings
 {
-    internal class Class1
+    public static class User
     {
-        
+        public static string nickname;
     }
 }
