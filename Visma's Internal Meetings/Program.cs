@@ -1,251 +1,93 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Visma_s_Internal_Meetings 
 {
     class Program
     {
-        private static bool running = true;
-        private static bool loggedIn = false;
-
         static void Main(string[] args)
         {
-            int choice;
-
-            while (running)
+            while (true)
             {
-                while (!loggedIn)
-                {
-                    Login();
-                }
+                Login();
 
                 Console.Clear();
+                Console.WriteLine($"Logged in as {UserAuthorization.s_user.Nickname}");
+                Console.WriteLine("Enter 1 to create meeting");
+                Console.WriteLine("Enter 2 to show all meetings");
 
-                Console.WriteLine("Connected user: " + User.nickname);
-                Console.WriteLine();
-                Console.WriteLine("Close program enter -> 0");
-                Console.WriteLine("Create a new meeting enter -> 1");
-                Console.WriteLine("Show all meetings enter -> 2");
+                string userInput = Console.ReadLine();
 
-                if (!int.TryParse(Console.ReadLine(), out choice))
+                if (string.IsNullOrEmpty(userInput))
                 {
-                    WrongOptionEntered();
+                    HelperClass.BadInput();
                     continue;
                 }
 
-                switch (choice)
+                if (!int.TryParse(userInput, out int output))
                 {
-                    case 0:
-                        {
-                            running = false;
-                            break;
-                        }
-                    case 1:
-                        {
-                            CreateNewMeeting();
-                            break;
-                        }
-                    case 2:
-                        {
-                            ShowAllMeetings();
-                            break;
-                        }
-                    default:
-                        {
-                            WrongOptionEntered();
-                            break;
-                        }
-
+                    HelperClass.BadInput();
+                    continue;
                 }
 
-            }
-        }
-
-        private static void ShowAllMeetings()
-        {
-            List<Meeting> meetings = FileWriter.ReadFromFile("main.txt");
-            if (meetings == null)
-            {
-                Console.WriteLine("There are no meetings.");
-                return;
-            }
-
-            Console.WriteLine("Meetings:");
-            Console.WriteLine("___________________________________");
-            foreach (var item in meetings)
-            {
-                Console.WriteLine(meetings.IndexOf(item) + " entry");
-                item.Print();
-                Console.WriteLine();
-            }
-
-            // filter options 
-            // back option
-
-            Console.WriteLine("To select meeting enter {1}");
-            Console.WriteLine("To filter enter {2}");
-            int choice = Console.ReadLine();
-
-            switch (choice)
-            {
-                case 1:
+                switch (output)
+                {
+                    case 1:
                     {
-
+                        MeetingOperations.CreateNewMeeting();
                         break;
                     }
+                    case 2:
+                    {
+                        MeetingOperations.ShowAllMeetings();
+                        break;
+                    }
+                }
             }
-
         }
-
-        private static void WrongOptionEntered()
-        {
-            Console.WriteLine("Bad input. Try again.");
-            Console.ReadLine();
-        }
-
         private static void Login()
         {
-            Console.WriteLine("Simplified Login");
-            Console.WriteLine("Write your nickname. It will be used as a resposiblePerson field.");
-            string nickaname = Console.ReadLine();
-            if (string.IsNullOrEmpty(nickaname))
+            while (!UserAuthorization.s_loggedIn)
             {
-                Console.WriteLine("Nickname cannot be empty. Press enter to try again.");
-                Console.ReadLine();
-                return;
-            }
-            else
-            {
-                User.nickname = nickaname;
-                loggedIn = true;
-                Console.WriteLine("Yuo are now connected. Press enter to continue.");
-                Console.ReadLine();
+                Console.Clear();
+                Console.WriteLine("Registration and Login.");
+                Console.WriteLine("Enter {1} to login.");
+                Console.WriteLine("Enter {2} to register.");
+
+                string userInput = Console.ReadLine();
+
+                if (string.IsNullOrEmpty(userInput))
+                {
+                    HelperClass.BadInput();
+                    continue;
+                }
+
+                if (!int.TryParse(userInput, out int output)){
+                    HelperClass.BadInput();
+                    continue;
+                }
+
+                if(output < 1 || output > 2)
+                {
+                    HelperClass.BadInput();
+                    continue;
+                }
+
+                switch (output)
+                {
+                    case 1:
+                    {
+                        UserAuthorization.Login();
+                        break;
+                    }
+                    case 2:
+                    {
+                        UserAuthorization.Register();
+                        break;
+                    }
+                }
             }
         }
-
-        private static void CreateNewMeeting()
-        {
-
-            Meeting meeting = new Meeting();
-
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("Enter name");
-                string input = Console.ReadLine();
-                if (string.IsNullOrEmpty(input))
-                {
-                    WrongOptionEntered();
-                    continue;
-                }
-
-                meeting.name = input;
-                break;
-            }
-
-            meeting.responsiblePers = User.nickname;
-
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("Enter description");
-                string input = Console.ReadLine();
-                if (string.IsNullOrEmpty(input))
-                {
-                    WrongOptionEntered();
-                    continue;
-                }
-
-                meeting.description = input;
-                break;
-            }
-
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("Choose category");
-
-                int choice;
-                for (int i = 0; i < Meeting.Categories.Count; i++)
-                {
-                    Console.WriteLine("Enter " + i + " to choose " + Meeting.Categories[i]);
-                }
-
-                bool parsed = int.TryParse(Console.ReadLine(), out choice);
-
-                if (!parsed || choice < 0 || choice >= Meeting.Categories.Count)
-                {
-                    WrongOptionEntered();
-                    continue;
-                }
-
-                meeting.category = Meeting.Categories[choice];
-                break;
-            }
-
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("Choose type");
-
-                int choice;
-                for (int i = 0; i < Meeting.Types.Count; i++)
-                {
-                    Console.WriteLine("Enter " + i + " to choose " + Meeting.Types[i]);
-                }
-
-                bool parsed = int.TryParse(Console.ReadLine(), out choice);
-
-                if (!parsed || choice < 0 || choice >= Meeting.Types.Count)
-                {
-                    WrongOptionEntered();
-                    continue;
-                }
-
-                meeting.type = Meeting.Types[choice];
-                break;
-            }
-
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("Enter start date. ");
-                Console.WriteLine("Date Format: day/month/year hour:minute:second");
-                Console.WriteLine("Example input: 13/09/2022 00:00:00");
-
-                DateTime date;
-                string input = Console.ReadLine();
-                if(!DateTime.TryParse(input, out date))
-                {
-                    WrongOptionEntered();
-                    continue;
-                }
-
-                meeting.startDate = date;
-                break;
-            }
-
-            while (true)
-            {
-                Console.Clear();
-                Console.WriteLine("Enter end date. ");
-                Console.WriteLine("Date Format: month/day/year hour:minute:second");
-                Console.WriteLine("Example input: 09/13/2022 00:00:00");
-
-                DateTime date;
-                string input = Console.ReadLine();
-                if (!DateTime.TryParse(input, out date))
-                {
-                    WrongOptionEntered();
-                    continue;
-                }
-
-                meeting.endDate = date;
-                break;
-            }
-
-            FileWriter.AppendToFile("main.txt", meeting);
-        }
-
     }
 }

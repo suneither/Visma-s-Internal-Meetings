@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Visma_s_Internal_Meetings
 {
-    class Meeting
+    public class Meeting
     {
-        public static readonly List<string> Categories = new List<string>()
+        public static readonly List<string> s_categories = new List<string>()
         {
             "CodeMonkey",
             "Hub",
@@ -16,29 +13,40 @@ namespace Visma_s_Internal_Meetings
             "TeamBuilding"
         };
 
-        public static readonly List<string> Types = new List<string>()
+        public static readonly List<string> s_types = new List<string>()
         {
             "Live",
             "InPerson"
         };
 
-        public string name { get; set; }
-        public string description { get; set; }
-        public string responsiblePers { get; set; }
-        public string category { get; set; }
-        public string type { get; set; }
-        public DateTime startDate { get; set; }
-        public DateTime endDate { get; set; }
-
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int ResponsiblePersId { get; set; }
+        public string Category { get; set; }
+        public string Type { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+        public List<int> AttendeesIds { get; set; } 
         public void Print()
         {
-            Console.WriteLine("name: " + name);
-            Console.WriteLine("description: " + description);
-            Console.WriteLine("responsible Person: " + responsiblePers);
-            Console.WriteLine("category:" + category);
-            Console.WriteLine("type: " + type);
-            Console.WriteLine("startDate: " + startDate);
-            Console.WriteLine("endDate: " + endDate);
+            Console.WriteLine("name: " + Name);
+            Console.WriteLine("description: " + Description);
+            User user = FileWriter.GetAttendeeById(UserAuthorization.s_usersPath, ResponsiblePersId);
+            Console.WriteLine("responsible Person: " + user.Nickname);
+            Console.WriteLine("category:" + Category);
+            Console.WriteLine("type: " + Type);
+            Console.WriteLine("startDate: " + StartDate);
+            Console.WriteLine("endDate: " + EndDate);
+            Console.WriteLine("attendees: " + AttendeesIds.Count);
+        }
+
+        public void AddAttendee(User attendee)
+        {
+            if (attendee == null) return;
+            if (AttendeesIds == null) AttendeesIds = new List<int>();
+
+            AttendeesIds.Add(attendee.Id);
         }
     }
 }
